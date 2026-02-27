@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Tickets</title>
+
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(to right,#4facfe,#00f2fe);
+  text-align:center;
+}
+
+.container{
+  background:white;
+  width:700px;
+  margin:60px auto;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 0 20px rgba(0,0,0,0.2);
+}
+
+h2{
+  color:#333;
+}
+
+button{
+  background:#28a745;
+  color:white;
+  border:none;
+  padding:10px 20px;
+  font-size:16px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-bottom:20px;
+}
+
+button:hover{
+  background:#218838;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:#007bff;
+  color:white;
+  padding:10px;
+}
+
+td{
+  padding:10px;
+  border-bottom:1px solid #ddd;
+}
+
+tr:hover{
+  background:#f2f2f2;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <button onclick="window.location='index.html'">🏠 Home</button>
+</div>
+
+<h2>🎟️ My Bookings</h2>
+<button onclick="loadTickets()">Show
+   My Tickets</button>
+
+<table id="tickets">
+<tr>
+<th>Bus</th>
+<th>From</th>
+<th>To</th>
+<th>Time</th>
+<th>Seat</th>
+<th>Date</th>
+</tr>
+</table>
+
+</div>
+
+<script>
+function loadTickets() {
+  const userId = 1;
+
+  fetch(`http://localhost:3000/mybookings/${userId}`)
+    .then(res => res.json())
+    .then(data => {
+
+      let table = document.getElementById("tickets");
+
+      table.innerHTML = `
+      <tr>
+        <th>Bus</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Time</th>
+        <th>Seat</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>`;
+
+      data.forEach(b => {
+        let row = table.insertRow();
+
+        row.insertCell(0).innerText = b.name;
+        row.insertCell(1).innerText = b.source;
+        row.insertCell(2).innerText = b.destination;
+        row.insertCell(3).innerText = b.time;
+        row.insertCell(4).innerText = b.seat_no;
+        row.insertCell(5).innerText = b.date;
+
+        // Cancel button
+        let btn = document.createElement("button");
+        btn.innerText = "Cancel";
+        btn.style.background = "red";
+        btn.style.color = "white";
+        btn.style.border = "none";
+        btn.style.padding = "5px 10px";
+        btn.style.borderRadius = "5px";
+
+        btn.onclick = () => cancelTicket(b.id);
+
+        row.insertCell(6).appendChild(btn);
+      });
+    });
+}
+
+function cancelTicket(id) {
+  if (!confirm("Are you sure to cancel ticket?")) return;
+
+  fetch("http://localhost:3000/cancelticket", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ booking_id: id })
+  })
+  .then(res => res.text())
+  .then(msg => {
+    alert(msg);
+    loadTickets(); // reload table
+  });
+}
+function goHome(){
+  window.location.href = "index.html";
+}
+</script>
+</body>
+</html>

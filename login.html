@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bus Ticket Login</title>
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(to right,#4facfe,#00f2fe);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.box{
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 0 10px gray;
+  text-align:center;
+}
+input{
+  width:200px;
+  padding:10px;
+  margin:10px;
+}
+button{
+  padding:10px 20px;
+  background:green;
+  color:white;
+  border:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Bus Ticket Login 🚍</h2>
+
+<input id="email" placeholder="Email"><br>
+<input id="password" placeholder="Password" type="password"><br>
+<button onclick="login()">Login</button>
+<button onclick="window.location='index.html'">🏠 Home</button>
+
+</div>
+
+<script>
+function login() {
+  fetch("http://localhost:3000/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: document.getElementById("email").value,
+      password: document.getElementById("password").value
+    })
+  })
+  .then(res => res.text())
+  .then(data => {
+  alert(data);
+
+  if(data.includes("Successful")){
+    window.location.href = "search.html";
+  }
+});
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bus Ticket Booking</title>
+<style>
+body{
+  font-family:Arial;
+  background:linear-gradient(to right,#1e3c72,#2a5298);
+  color:white;
+  text-align:center;
+  padding-top:100px;
+}
+button{
+  padding:15px 30px;
+  margin:10px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+.login{background:#27ae60;}
+.search{background:#3498db;}
+.tickets{background:#e67e22;}
+</style>
+</head>
+
+<body>
+
+<h1>🚍 Bus Ticket Booking</h1>
+
+<button class="login" onclick="goLogin()">Login / Register</button>
+<br>
+<button class="search" onclick="goSearch()">Search Bus</button>
+<br>
+<button class="tickets" onclick="goTickets()">My Tickets</button>
+
+<script>
+function goLogin(){
+  window.location.href="login.html";
+}
+
+function goSearch(){
+  window.location.href="search.html";
+}
+
+function goTickets(){
+  window.location.href="mytickets.html";
+}
+</script>
+
+</body>
+</html>

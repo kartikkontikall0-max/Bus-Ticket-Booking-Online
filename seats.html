@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Select Seat</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(to right,#1e3c72,#2a5298);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container{
+  background:#fff;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  text-align:center;
+  width:420px;
+}
+
+.title{
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:15px;
+}
+
+.bus{
+  background:#222;
+  padding:20px;
+  border-radius:20px;
+  color:white;
+}
+
+.driver{
+  text-align:right;
+  margin-bottom:10px;
+}
+
+.row{
+  display:flex;
+  justify-content:center;
+  margin:6px 0;
+}
+
+.left,.right{
+  display:flex;
+  gap:6px;
+}
+
+.aisle{
+  width:40px;
+}
+
+.seat{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.available{
+  background:#2ecc71;
+}
+
+.booked{
+  background:#e74c3c;
+  cursor:not-allowed;
+}
+
+.selected{
+  background:#f1c40f !important;
+}
+
+.legend{
+  margin-top:15px;
+}
+
+button.book{
+  margin-top:15px;
+  padding:10px 20px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#27ae60;
+  color:white;
+  cursor:pointer;
+}
+
+button.book:hover{
+  background:#219150;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="title">🚍 Select Your Seat</div>
+
+<div class="bus">
+<div class="driver">Driver 👨‍✈️</div>
+<div id="busLayout"></div>
+</div>
+
+<div class="legend">
+🟢 Available &nbsp;&nbsp; 🔴 Booked &nbsp;&nbsp; 🟡 Selected
+<br><br>
+
+<b id="selectedSeat">Selected Seat: None</b><br>
+<b id="totalPrice">Total Price: ₹0</b><br>
+
+<button class="book" onclick="bookSeat()">Book Selected Seat</button>
+<button onclick="window.location='index.html'">🏠 Home</button>
+</div>
+
+</div>
+
+<script>
+
+let chosenSeat=null;
+let seatPrice = localStorage.getItem("price") || 500;   // default 500
+
+function selectSeat(seat){
+
+let btn = document.getElementById("seat"+seat);
+if(!btn) return;
+
+if(btn.classList.contains("booked")) return;
+
+chosenSeat = seat;
+
+document.querySelectorAll(".seat").forEach(s=>s.classList.remove("selected"));
+btn.classList.add("selected");
+
+document.getElementById("selectedSeat").innerText =
+"Selected Seat: " + seat;
+
+document.getElementById("totalPrice").innerText =
+"Total Price: ₹" + seatPrice;
+}
+
+async function bookSeat(){
+
+if(!chosenSeat){
+  alert("Please select seat");
+  return;
+}
+
+const res = await fetch("http://localhost:3000/bookticket",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body: JSON.stringify({
+    user_id:1,
+    bus_id:localStorage.getItem("bus_id"),
+    seat_no:chosenSeat,
+    date:"26-02-2026"
+  })
+});
+
+const data = await res.json();
+
+alert(
+  data.message +
+  "\nBus: " + data.bus +
+  "\nSeat: " + data.seat +
+  "\nDate: " + data.date +
+  "\nPrice: ₹" + data.price
+);
+window.location="mytickets.html";
+}
+
+async function loadSeats(){
+
+  const res = await fetch("http://localhost:3000/bookedseats",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      bus_id:localStorage.getItem("bus_id"),
+      date:"26-02-2026"
+    })
+  });
+
+  const data = await res.json();
+
+  const booked = data.map(s => s.seat_no);
+
+  let seat=1;
+  let html="";
+
+  for(let r=0;r<10;r++){
+
+    html+=`<div class="row">`;
+
+    html+=`<div class="left">`;
+    for(let i=0;i<3;i++){
+      if(booked.includes(seat)){
+        html+=`<button class="seat booked">${seat}</button>`;
+      }else{
+        html+=`<button class="seat available" id="seat${seat}" onclick="selectSeat(${seat})">${seat}</button>`;
+      }
+      seat++;
+    }
+    html+=`</div>`;
+
+    html+=`<div class="aisle"></div>`;
+
+    html+=`<div class="right">`;
+    for(let i=0;i<2;i++){
+      if(booked.includes(seat)){
+        html+=`<button class="seat booked">${seat}</button>`;
+      }else{
+        html+=`<button class="seat available" id="seat${seat}" onclick="selectSeat(${seat})">${seat}</button>`;
+      }
+      seat++;
+    }
+    html+=`</div>`;
+
+    html+=`</div>`;
+  }
+
+  document.getElementById("busLayout").innerHTML=html;
+}
+loadSeats();
+
+</script>
+
+</body>
+</html>

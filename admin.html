@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial;
+  background: linear-gradient(120deg,#4facfe,#00f2fe);
+}
+
+.header{
+  background:#222;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+}
+
+.container{
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  margin-top:30px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  width:320px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+input{
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+  border-radius:5px;
+  border:1px solid #ccc;
+}
+
+button{
+  padding:8px 15px;
+  margin-top:8px;
+  border:none;
+  border-radius:5px;
+  background:#007bff;
+  color:white;
+  cursor:pointer;
+}
+
+button.delete{
+  background:red;
+}
+
+.bus{
+  background:#f1f1f1;
+  padding:8px;
+  margin:5px 0;
+  border-radius:5px;
+}
+</style>
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(to right,#1e3c72,#2a5298);
+  padding:20px;
+}
+
+button{
+  background:#ff9800;
+  color:white;
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+#busList{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+
+.bus-card{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.bus-card h3{
+  color:#2a5298;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🚍 Bus Admin Panel</div>
+
+<div class="container">
+
+<div class="card">
+<h3>Add Bus</h3>
+<input id="name" placeholder="Bus Name">
+<input id="source" placeholder="Source">
+<input id="destination" placeholder="Destination">
+<input id="time" placeholder="Time">
+<input id="seats" placeholder="Seats">
+
+<button onclick="addBus()">Add Bus</button>
+</div>
+
+<div class="card">
+<h3>All Buses</h3>
+<button onclick="loadBuses()">Load All Buses 🚍</button>
+
+<div id="busList"></div>
+</div>
+
+</div>
+
+<script>
+async function addBus(){
+
+  const res = await fetch("http://localhost:3000/addbus",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      name: document.getElementById("name").value,
+      source: document.getElementById("source").value,
+      destination: document.getElementById("destination").value,
+      time: document.getElementById("time").value,
+      seats: document.getElementById("seats").value
+    })
+  });
+
+  alert(await res.text());
+}
+
+async function loadBuses(){
+
+  const res = await fetch("http://localhost:3000/getbuses");
+  const data = await res.json();
+
+  let html="";
+  data.forEach(b=>{
+    html+=`
+      <div class="bus">
+        ${b.name} | ${b.source} → ${b.destination}
+        <button class="delete" onclick="deleteBus(${b.id})">Delete</button>
+      </div>`;
+  });
+
+  document.getElementById("busList").innerHTML=html;
+}
+
+async function deleteBus(id){
+  await fetch("http://localhost:3000/deletebus/"+id);
+  loadBuses();
+}
+</script>
+<script>
+async function loadBuses(){
+  const res = await fetch("http://localhost:3000/getbuses");
+  const buses = await res.json();
+
+  let html = "";
+
+  buses.forEach(bus=>{
+    html += `
+      <div class="bus-card">
+        <h3>${bus.name}</h3>
+        <p>📍 ${bus.source} → ${bus.destination}</p>
+        <p>⏰ ${bus.time}</p>
+        <p>💺 Seats: ${bus.seats}</p>
+      </div>
+    `;
+  });
+
+  document.getElementById("busList").innerHTML = html;
+}
+</script>
+</body>
+</html>

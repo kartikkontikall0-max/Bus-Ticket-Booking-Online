@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Search Bus</title>
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(to right,#ff9966,#ff5e62);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.box{
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 0 10px gray;
+  text-align:center;
+}
+input{
+  width:200px;
+  padding:10px;
+  margin:10px;
+}
+button{
+  padding:10px 20px;
+  background:blue;
+  color:white;
+  border:none;
+}
+.result{
+  margin-top:20px;
+  text-align:left;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+<h2>Search Bus 🚍</h2>
+
+<input id="source" placeholder="From City"><br>
+<input id="destination" placeholder="To City"><br>
+<button onclick="search()">Search</button>
+
+<div id="result" class="result"></div>
+</div>
+
+<script>
+function search() {
+  fetch("http://localhost:3000/searchbus", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+  source: document.getElementById("source").value.trim(),
+  destination: document.getElementById("destination").value.trim()
+})
+  })
+  .then(res => res.json())
+  .then(data => {
+    let html = "";
+    data.forEach(bus => {
+     html += `
+<div style="border:1px solid gray;padding:10px;margin:10px">
+ 🚌 ${bus.name} | ${bus.source} → ${bus.destination} | ${bus.time}
+ <br>Price: ₹${bus.price || 500}
+ <br>
+ <button onclick="selectBus(${bus.id}, ${bus.price || 500})">
+   Select Seat
+ </button>
+</div>`;
+    });
+    document.getElementById("result").innerHTML = html;
+  });
+}
+function selectBus(id, price){
+  localStorage.setItem("bus_id", id);
+  localStorage.setItem("price", price);
+  window.location.href = "seats.html";
+}
+</script>
+
+</body>
+</html>
